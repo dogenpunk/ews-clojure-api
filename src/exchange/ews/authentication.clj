@@ -58,6 +58,20 @@
      (log/info "Connected to Exchange via autodiscover")
      (reset! service-instance service))))
 
+(defn connect-with-token
+  "Connect to Exchange API via URL using OAuth2 token."
+  ([token]
+   (connect-with-token token (:exchange-url env) (or (:exchange-version env) default-version)))
+  ([token url]
+   (connect-with-token token url :ex-2010-SP2))
+  ([token url version]
+   (let [service (ExchangeService. (ExchangeVersion/valueOf (version exchange-versions)))]
+     (doto service
+       (.setCredentials (TokenCredentials. token))
+       (.setUrl (URI. url)))
+     (log/info "Connected to Exchange via URL and OAuth2")
+     (reset! service-instance service))))
+
 (defn impersonate-user
   "Impersonates target user via "
   ([email-address]
