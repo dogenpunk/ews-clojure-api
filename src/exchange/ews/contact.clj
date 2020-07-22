@@ -1,4 +1,4 @@
-(ns exchange.ews.contacts
+(ns exchange.ews.contact
   (:require [exchange.ews.authentication :refer [service-instance]])
   (:import (microsoft.exchange.webservices.data.core.service.item Contact)
            (microsoft.exchange.webservices.data.core.enumeration.service ConflictResolutionMode)
