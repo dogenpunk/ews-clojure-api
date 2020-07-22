@@ -7,7 +7,7 @@
            (microsoft.exchange.webservices.data.core ExchangeService)
            (microsoft.exchange.webservices.data.core.enumeration.misc ExchangeVersion
                                                                       ConnectingIdType)
-           (microsoft.exchange.webservices.data.credential WebCredentials)
+           (microsoft.exchange.webservices.data.credential WebCredentials OAuthCredentials)
            (microsoft.exchange.webservices.data.misc ImpersonatedUserId)))
 
 (def ^{:doc "Exchange version supported by EWS"} exchange-versions
@@ -65,9 +65,10 @@
   ([token url]
    (connect-with-token token url :ex-2010-SP2))
   ([token url version]
-   (let [service (ExchangeService. (ExchangeVersion/valueOf (version exchange-versions)))]
+   (let [service (ExchangeService. (ExchangeVersion/valueOf (version exchange-versions)))
+         credential (OAuthCredentials. token)]
      (doto service
-       (.setCredentials (TokenCredentials. token))
+       (.setCredentials credential)
        (.setUrl (URI. url)))
      (log/info "Connected to Exchange via URL and OAuth2")
      (reset! service-instance service))))
