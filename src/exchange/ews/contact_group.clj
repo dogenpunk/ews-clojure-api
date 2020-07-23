@@ -15,6 +15,7 @@
                                                                  GroupMember
                                                                  ItemId)))
 
+
 (defmulti get-contact-group
   type)
 
@@ -35,7 +36,7 @@
 
 (defn set-group-display-name
   [id display-name]
-  (let [group (get-contact-group id)]
+  (let [group (get-contact-group-by-id id)]
     (.setDisplayName group display-name)
     (.update group ConflictResolutionMode/AlwaysOverwrite)))
 
@@ -44,7 +45,28 @@
    (let [group (ContactGroup. @service-instance)]
      (.setDisplayName group display-name)
      (.save group)
+     group))
+  ([display-name members]
+   (let [group (ContactGroup. @service-instance)
+         group-members (.getMembers group)]
+     (.setDisplayName group display-name)
+     (doseq [{:keys [id emailAddress]} members]
+       (.addPersonalContact group-members id emailAddress))
+     (.save group)
      group)))
+
+(defn get-contact-group-by-name
+  ([group-name]
+   (let [sf (SearchFilter$IsEqualTo. ContactGroupSchema/DisplayName group-name)
+         items (.findItems @service-instance WellKnownFolderName/Contacts sf (ItemView. 1))]
+     (first (.getItems items)))))
+
+(defn get-contact-group-members
+  [group-name]
+  (let [cgroupId (.getId (get-contact-group-by-name group-name))
+        cgroup (ContactGroup/bind @service-instance cgroupId)]
+    (into [] (.getMembers cgroup))))
+
 
 (defn add-contact!
   [group contact]
