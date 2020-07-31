@@ -40,15 +40,23 @@
   ([display-name]
    (let [group (ContactGroup. @service-instance)]
      (.setDisplayName group display-name)
-     (.save group)))
-  ([display-name members]
-   (let [group (ContactGroup. @service-instance)
-         group-members (.getMembers group)]
-     (.setDisplayName group display-name)
-     (doseq [{:keys [id emailAddress]} members]
-       (.addPersonalContact id emailAddress))
      (.save group))))
 
-(comment
-  (create-group
-   "Instructors - Inactive"))
+(defn add-contact
+  [group contact]
+  (.addPersonalContact (.getMembers group) (.getId contact))
+  group)
+
+(defn remove-member
+  [group member]
+  (let [members (.getMembers group)]
+    (.remove members member)))
+
+(defn get-members
+  ([group]
+   (.getMembers group))
+  ([group emails]
+   (for [member (.getMembers group)
+         :let [address (.getAddress (.getEmailAddress member EmailAddressKey/EmailAddress1))]
+         :when (emails address)]
+     member)))
