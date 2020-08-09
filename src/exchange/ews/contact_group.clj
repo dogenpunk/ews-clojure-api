@@ -34,20 +34,21 @@
   [id display-name]
   (let [group (get-contact-group id)]
     (.setDisplayName group display-name)
-    (.update group ConflictResolutionMode/AutoResolve)))
+    (.update group ConflictResolutionMode/AlwaysOverwrite)))
 
-(defn create-group
+(defn create-group!
   ([display-name]
    (let [group (ContactGroup. @service-instance)]
      (.setDisplayName group display-name)
-     (.save group))))
+     (.save group)
+     group)))
 
-(defn add-contact
+(defn add-contact!
   [group contact]
   (.addPersonalContact (.getMembers group) (.getId contact))
   group)
 
-(defn remove-member
+(defn remove-member!
   [group member]
   (let [members (.getMembers group)]
     (.remove members member)))
@@ -56,6 +57,7 @@
   ([group]
    (.getMembers group))
   ([group emails]
+   {:pre [(set? emails)]}
    (for [member (.getMembers group)
          :let [address (.getAddress (.getEmailAddress member EmailAddressKey/EmailAddress1))]
          :when (emails address)]
