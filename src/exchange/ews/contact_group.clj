@@ -59,6 +59,6 @@
   ([group emails]
    {:pre [(set? emails)]}
    (for [member (.getMembers group)
-         :let [address (.getAddress (.getEmailAddress member EmailAddressKey/EmailAddress1))]
+         :let [address (.getAddress (.getAddressInformation member EmailAddressKey/EmailAddress1))]
          :when (emails address)]
      member)))
