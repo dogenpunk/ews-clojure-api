@@ -9,6 +9,8 @@
            (microsoft.exchange.webservices.data.core.enumeration.property EmailAddressKey)
            (microsoft.exchange.webservices.data.property.complex GroupMember GroupMemberCollection)
            (microsoft.exchange.webservices.data.core.enumeration.service ConflictResolutionMode)
+           (microsoft.exchange.webservices.data.core.enumeration.property BasePropertySet)
+           (microsoft.exchange.webservices.data.core PropertySet)
            (microsoft.exchange.webservices.data.property.complex GroupMemberCollection
                                                                  GroupMember
                                                                  ItemId)))
@@ -22,13 +24,14 @@
 
 (defmethod get-contact-group ItemId
   [id]
-  (ContactGroup/bind @service-instance id))
+  (ContactGroup/bind @service-instance id (PropertySet. BasePropertySet/FirstClassProperties)))
 
 (defn get-contact-group-by-name
   ([group-name]
      (let [sf (SearchFilter$IsEqualTo. ContactGroupSchema/DisplayName group-name)
-           items (.findItems @service-instance WellKnownFolderName/Contacts sf (ItemView. 1))]
-       (first (.getItems items)))))
+           items (.findItems @service-instance WellKnownFolderName/Contacts sf (ItemView. 1))
+           group (first (.getItems items))]
+       (ContactGroup/bind @service-instance (.getId group) (PropertySet. BasePropertySet/FirstClassProperties)))))
 
 (defn set-group-display-name
   [id display-name]
@@ -62,3 +65,8 @@
          :let [address (.getAddress (.getAddressInformation member EmailAddressKey/EmailAddress1))]
          :when (emails address)]
      member)))
+
+(defn update-group!
+  [group]
+  (.update group ConflictResolutionMode/AlwaysOverwrite)
+  group)
